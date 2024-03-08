@@ -1,0 +1,26 @@
+spring:
+  profiles:
+    active: local
+
+  kafka:
+    bootstrap-servers: kafka:9092
+  elasticsearch:
+    url: localhost:9200
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/chattingRoom?useSSL=false&allowMultiQueries=true&serverTimeZone=Asia/Seoul
+    username: root
+    password: tjdwns92
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        hbm2ddl:
+          auto: none
+
+server:
+  port: 8787
+  address: 192.168.3.93
+
