@@ -32,4 +32,7 @@ public class ChattingRoomParticipants {
 
     @Column(name = "joined_date", updatable = false)
     private Date joinedDate;
+
+    @Column(name = "leave_date", insertable = false)
+    private Date leaveDate;
 }

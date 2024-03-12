@@ -26,10 +26,13 @@ public class ChattingRoomParticipantsResponseDto {
 
     private Date joinedDate;
 
+    private Date leaveDate;
+
     public ChattingRoomParticipantsResponseDto(ChattingRoomParticipants chattingRoomParticipants) {
         this.uid = chattingRoomParticipants.getUid();
         this.chattingRoomUid = chattingRoomParticipants.getChattingRoomUid();
         this.participantsUid = chattingRoomParticipants.getParticipantsUid();
         this.joinedDate = chattingRoomParticipants.getJoinedDate();
+        this.leaveDate = chattingRoomParticipants.getLeaveDate();
     }
 }

@@ -2,6 +2,8 @@ package com.example.ssetest.controller;
 
 import com.example.ssetest.domain.Member;
 import com.example.ssetest.service.MemberService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,8 +28,8 @@ public class MemberController {
     }
 
     @PostMapping("login")
-    public Member loginMember(@RequestBody Member member) {
-        Member detailMember = memberService.detailMember(member.getUsername());
+    public Member loginMember(@RequestBody Member member, HttpServletRequest request, HttpServletResponse response) {
+        Member detailMember = memberService.loginMember(member.getUsername(), request, response);
         if (detailMember != null) {
             return member;
         } else {

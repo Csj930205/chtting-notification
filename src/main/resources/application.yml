@@ -24,3 +24,9 @@ server:
   port: 8787
   address: 192.168.3.93
 
+
+jwt:
+  token:
+    secretKey: "secretKey-adntlye-groupware-authorization-jwt-manage-token"
+    accessTokenValidTime: 2592000000  # 30days
+

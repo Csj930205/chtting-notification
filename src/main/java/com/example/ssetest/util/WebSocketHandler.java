@@ -51,6 +51,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
         System.out.println("연결 끊김");
     }
 
+
+
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         ChatMessage chatMessage = objectMapper.readValue(message.getPayload(), ChatMessage.class);

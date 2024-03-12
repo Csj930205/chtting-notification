@@ -5,6 +5,7 @@ import com.example.ssetest.domain.BoardArticle;
 import com.example.ssetest.domain.BoardGroup;
 import com.example.ssetest.domain.BoardGroupUser;
 import com.example.ssetest.domain.NotificationMessage;
+import com.example.ssetest.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -46,13 +47,13 @@ public class NotificationService {
     public SseEmitter subscribe(String username, String lastEventId) {
         SseEmitter sseEmitter = new SseEmitter(DEFAULT_TIMEOUT);
         try {
-          sseEmitter.send(SseEmitter.event().name("connect").data("GOOD"));
+            sseEmitter.send(SseEmitter.event().name("connect").data("GOOD"));
             log.info("success");
         } catch (IOException e) {
             e.printStackTrace();
         }
-        NotificationController.boardSseEmitters.put(username, sseEmitter);
-
+        String getUsername = SecurityUtil.getCurrentMember().getUsername();
+        NotificationController.boardSseEmitters.put(getUsername, sseEmitter);
 
         sseEmitter.onCompletion(() -> NotificationController.boardSseEmitters.remove(username));	// sseEmitter 연결이 완료될 경우
         sseEmitter.onTimeout(() -> NotificationController.boardSseEmitters.remove(username));		// sseEmitter 연결에 타임아웃이 발생할 경우
@@ -63,31 +64,6 @@ public class NotificationService {
         }
 
         return sseEmitter;
-    }
-
-    public void notifyMessage(String username) {
-        String message = "메세지 테스트";
-
-        NotificationMessage notificationMessage = NotificationMessage.builder()
-                .message(message)
-                .groupMemberUid(username)
-                .build();
-
-        for (Map.Entry<String, SseEmitter> entry : NotificationController.boardSseEmitters.entrySet()) {
-            SseEmitter sseEmitter = entry.getValue();
-            try {
-                sseEmitter.send(SseEmitter.event().name("addMessage").data("메세지 보낸다"));
-                log.info("메세지 보내기 성공");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        try {
-            ProducerRecord<String, NotificationMessage> record = new ProducerRecord<>("gw-notification-topic",0,  username, notificationMessage);
-            kafkaTemplate.send(record);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     public void notificationBoard(BoardArticle boardArticle) {
