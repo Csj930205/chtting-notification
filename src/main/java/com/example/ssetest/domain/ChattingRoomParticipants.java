@@ -5,6 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.util.Date;
 
@@ -18,6 +22,8 @@ import java.util.Date;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@DynamicInsert
+@DynamicUpdate
 public class ChattingRoomParticipants {
 
     @Id
@@ -31,8 +37,15 @@ public class ChattingRoomParticipants {
     private String participantsUid;
 
     @Column(name = "joined_date", updatable = false)
+    @CreationTimestamp
     private Date joinedDate;
 
-    @Column(name = "leave_date", insertable = false)
+    @Column(name = "leave_date", insertable = false, updatable = false)
     private Date leaveDate;
+
+    @Column(name = "connect_yn", columnDefinition = "varchar(1) default 'N' ")
+    private String connectYn;
+
+    @Column(name = "unread_message", columnDefinition = "int default '0' ")
+    private int unreadMessage;
 }

@@ -7,6 +7,7 @@ import com.example.ssetest.dto.ChattingRoomRequestDto;
 import com.example.ssetest.dto.ChattingRoomResponseDto;
 import com.example.ssetest.repository.ChattingRoomParticipantsRepository;
 import com.example.ssetest.repository.ChattingRoomRepository;
+import com.example.ssetest.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,18 +31,18 @@ public class ChattingRoomService {
     private final ChattingRoomParticipantsRepository chattingRoomParticipantsRepository;
 
     @Transactional(readOnly = true)
-    public List<ChattingRoomResponseDto> chattingRoomList() {
-        List<ChattingRoom> chattingRoomList = chattingRoomRepository.findAll();
+    public List<ChattingRoomResponseDto> myChattingRoomList() {
+        String currentUserUid = SecurityUtil.getCurrentMember().getUsername();
+        List<ChattingRoomParticipants> userChattingRooms = chattingRoomParticipantsRepository.findByParticipantsUid(currentUserUid);
         List<ChattingRoomResponseDto> chattingRoomResponseDtoList = new ArrayList<>();
-        for (ChattingRoom chattingRoom : chattingRoomList) {
-            List<ChattingRoomParticipants> participants = chattingRoomParticipantsRepository.findByChattingRoomUid(chattingRoom.getUid());
-            List<String> participantsList = new ArrayList<>();
 
-            for (ChattingRoomParticipants chattingRoomParticipants : participants) {
-                participantsList.add(chattingRoomParticipants.getParticipantsUid());
+        for (ChattingRoomParticipants chattingRoomParticipant : userChattingRooms) {
+            ChattingRoom chattingRoom = chattingRoomRepository.findById(chattingRoomParticipant.getChattingRoomUid()).orElse(null);
+            if (chattingRoom != null) {
+                List<ChattingRoomParticipants> participantsList = chattingRoomParticipantsRepository.findByChattingRoomUid(chattingRoom.getUid());
+                ChattingRoomResponseDto chattingRoomResponseDto = new ChattingRoomResponseDto(chattingRoom, participantsList);
+                chattingRoomResponseDtoList.add(chattingRoomResponseDto);
             }
-            ChattingRoomResponseDto chattingRoomResponseDto = new ChattingRoomResponseDto(chattingRoom, participantsList);
-            chattingRoomResponseDtoList.add(chattingRoomResponseDto);
         }
         return chattingRoomResponseDtoList;
     }
@@ -65,5 +66,6 @@ public class ChattingRoomService {
         }
         return insertChattingRoom;
     }
+
 
 }

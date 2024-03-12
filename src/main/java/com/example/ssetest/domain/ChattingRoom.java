@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -20,6 +23,8 @@ import java.util.Date;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@DynamicInsert
+@DynamicUpdate
 public class ChattingRoom implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -32,6 +37,7 @@ public class ChattingRoom implements Serializable {
     private String createdBy;
 
     @Column(name = "created_date", updatable = false)
+    @CreationTimestamp
     private Date createdDate;
 
 }

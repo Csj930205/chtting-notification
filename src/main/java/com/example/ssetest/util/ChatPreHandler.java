@@ -1,7 +1,9 @@
 package com.example.ssetest.util;
 
 import com.example.ssetest.controller.ChatMessageController;
+import com.example.ssetest.domain.ChattingRoomParticipants;
 import com.example.ssetest.domain.Member;
+import com.example.ssetest.repository.ChattingRoomParticipantsRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.messaging.Message;
@@ -22,6 +24,8 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class ChatPreHandler implements ChannelInterceptor {
+
+    private final ChattingRoomParticipantsRepository chattingRoomParticipantsRepository;
 
     @SneakyThrows
     @Override
@@ -57,14 +61,28 @@ public class ChatPreHandler implements ChannelInterceptor {
             } else {
                 if (StompCommand.SUBSCRIBE.equals(command)) {
                     List<String> userList = ChatMessageController.chattingUserList.get("userList");
-
                     System.out.println("구독자수: " + userList.size());
                 }
                 if (StompCommand.DISCONNECT.equals(command)) {
                     List<String> userList = ChatMessageController.chattingUserList.get("userList");
                     if (userList != null) {
-
+                        userList.remove(member.getUsername());
                         System.out.println("연결끊긴 후 구독자수: " + userList.size());
+                    }
+                    List<ChattingRoomParticipants> chattingRoomParticipantsList = chattingRoomParticipantsRepository.findByParticipantsUid(member.getUsername());
+                    if (chattingRoomParticipantsList != null) {
+                        for (ChattingRoomParticipants participants : chattingRoomParticipantsList) {
+                            if (participants.getConnectYn().equals("Y")) {
+                                ChattingRoomParticipants chattingRoomParticipants = ChattingRoomParticipants.builder()
+                                        .uid(participants.getUid())
+                                        .chattingRoomUid(participants.getChattingRoomUid())
+                                        .participantsUid(participants.getParticipantsUid())
+                                        .unreadMessage(participants.getUnreadMessage())
+                                        .connectYn("N")
+                                        .build();
+                                chattingRoomParticipantsRepository.save(chattingRoomParticipants);
+                            }
+                        }
                     }
                 }
                 return message;

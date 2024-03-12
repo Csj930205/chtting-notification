@@ -18,10 +18,7 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
@@ -53,19 +50,57 @@ public class ChatMessageController {
         ProducerRecord<String, ChatMessage> record = new ProducerRecord<>("gw-chat-topic", 0, chatMessage.getRoomUid(), chatMessage);
         kafkaTemplate.send(record);
         List<ChattingRoomParticipants> participantsList = chattingRoomParticipantsRepository.findByChattingRoomUid(Long.valueOf(chatMessage.getRoomUid()));
-
+        List<String> userList = chattingUserList.get("userList");
         for (ChattingRoomParticipants participants : participantsList) {
-            simpMessageSendingOperations.convertAndSend("/chat?userId=" + participants.getParticipantsUid(), chatMessage);
+            ChattingRoomParticipants detailParticipants = chattingRoomParticipantsRepository.findByChattingRoomUidAndParticipantsUid(participants.getChattingRoomUid(), participants.getParticipantsUid());
+            if (userList.contains(participants.getParticipantsUid())) {
+                simpMessageSendingOperations.convertAndSend("/chat?userId=" + participants.getParticipantsUid(), chatMessage);
+                if (detailParticipants.getConnectYn().equals("N")) {
+                    ChattingRoomParticipants chattingRoomParticipants = ChattingRoomParticipants.builder()
+                            .uid(detailParticipants.getUid())
+                            .chattingRoomUid(detailParticipants.getChattingRoomUid())
+                            .connectYn("N")
+                            .participantsUid(detailParticipants.getParticipantsUid())
+                            .unreadMessage(detailParticipants.getUnreadMessage() + 1)
+                            .build();
+                    chattingRoomParticipantsRepository.save(chattingRoomParticipants);
+                }
+            } else {
+                ChattingRoomParticipants chattingRoomParticipants = ChattingRoomParticipants.builder()
+                        .uid(detailParticipants.getUid())
+                        .chattingRoomUid(detailParticipants.getChattingRoomUid())
+                        .connectYn("N")
+                        .participantsUid(detailParticipants.getParticipantsUid())
+                        .unreadMessage(detailParticipants.getUnreadMessage() + 1)
+                        .build();
+                chattingRoomParticipantsRepository.save(chattingRoomParticipants);
+            }
         }
     }
 
     @GetMapping(value = "/apis/chatting-list/{roomUid}")
     public List<ChatMessage> chattingMessageList(@PathVariable(value = "roomUid") String roomUid,  @RequestParam(required = false) Map<String, Object> paramMap) {
         List<ChatMessage> chatMessagesList = chatMessageService.getAllChatMessage(roomUid, paramMap);
+        String userUid = SecurityUtil.getCurrentMember().getUsername();
+        ChattingRoomParticipants detailParticipants = chattingRoomParticipantsRepository.findByChattingRoomUidAndParticipantsUid(Long.valueOf(roomUid), userUid);
+        ChattingRoomParticipants chattingRoomParticipants = ChattingRoomParticipants.builder()
+                .uid(detailParticipants.getUid())
+                .chattingRoomUid(detailParticipants.getChattingRoomUid())
+                .participantsUid(detailParticipants.getParticipantsUid())
+                .build();
+        if (detailParticipants.getUnreadMessage() > 0) {
+            chattingRoomParticipants = chattingRoomParticipants.toBuilder().unreadMessage(0).build();
+        }
+        if (detailParticipants.getConnectYn().equals("N")) {
+            chattingRoomParticipants = chattingRoomParticipants.toBuilder().connectYn("Y").build();
+        } else {
+            chattingRoomParticipants = chattingRoomParticipants.toBuilder().connectYn(detailParticipants.getConnectYn()).build();
+        }
+        chattingRoomParticipantsRepository.save(chattingRoomParticipants);
         return chatMessagesList;
     }
 
-    @Scheduled(fixedRate = 100000)
+    @Scheduled(fixedRate = 10000)
     public void pushWebSocket() {
         System.out.println("1분마다 실행되야함");
         if (chattingUserList.get("userList") != null) {

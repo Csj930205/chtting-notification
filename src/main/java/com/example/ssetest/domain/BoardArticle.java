@@ -3,6 +3,7 @@ package com.example.ssetest.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
 
@@ -28,6 +29,7 @@ public class BoardArticle {
     @Column(name = "created_by")
     private String createdBy;
 
-    @Column(name = "created_date")
+    @Column(name = "created_date", updatable = false)
+    @CreationTimestamp
     private Date createdDate;
 }

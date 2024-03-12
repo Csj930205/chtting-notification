@@ -1,6 +1,7 @@
 package com.example.ssetest.security.config;
 
 import com.example.ssetest.security.filter.CustomAuthenticationFilter;
+import com.example.ssetest.security.handler.LogoutSuccessHandler;
 import com.example.ssetest.security.service.MemberDetailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -35,6 +36,8 @@ public class SecurityConfig {
 
     private final CustomAuthenticationFilter customAuthenticationFilter;
 
+    private final LogoutSuccessHandler logoutSuccessHandler;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -60,6 +63,9 @@ public class SecurityConfig {
         http.authorizeHttpRequests(
             authorize -> authorize
                     .anyRequest().permitAll()
+        );
+        http.logout(httpSecurityLogoutConfigurer ->
+                httpSecurityLogoutConfigurer.logoutUrl("/apis/member/logout").logoutSuccessHandler(logoutSuccessHandler)
         );
         http.addFilterBefore(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

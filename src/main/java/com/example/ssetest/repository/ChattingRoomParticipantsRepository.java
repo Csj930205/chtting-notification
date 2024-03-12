@@ -13,4 +13,8 @@ public interface ChattingRoomParticipantsRepository extends JpaRepository<Chatti
 
     List<ChattingRoomParticipants> findByChattingRoomUid(Long chattingRoomUid);
 
+    List<ChattingRoomParticipants> findByParticipantsUid(String userUid);
+
+    ChattingRoomParticipants findByChattingRoomUidAndParticipantsUid(Long chattingRoomUid, String participantsUid);
+
 }

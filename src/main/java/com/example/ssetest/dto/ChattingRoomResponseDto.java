@@ -1,6 +1,7 @@
 package com.example.ssetest.dto;
 
 import com.example.ssetest.domain.ChattingRoom;
+import com.example.ssetest.domain.ChattingRoomParticipants;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,13 +22,13 @@ public class ChattingRoomResponseDto {
 
     private Long uid;
 
-    private List<String> participants;
+    private List<ChattingRoomParticipants> participants;
 
     private String createdBy;
 
     private Date createdDate;
 
-    public ChattingRoomResponseDto(ChattingRoom chattingRoom, List<String> participants) {
+    public ChattingRoomResponseDto(ChattingRoom chattingRoom, List<ChattingRoomParticipants> participants) {
         this.uid = chattingRoom.getUid();
         this.participants = participants;
         this.createdBy = chattingRoom.getCreatedBy();

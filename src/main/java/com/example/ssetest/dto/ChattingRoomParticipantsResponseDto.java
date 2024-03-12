@@ -28,11 +28,17 @@ public class ChattingRoomParticipantsResponseDto {
 
     private Date leaveDate;
 
+    private String connectYn;
+
+    private int unreadMessage;
+
     public ChattingRoomParticipantsResponseDto(ChattingRoomParticipants chattingRoomParticipants) {
         this.uid = chattingRoomParticipants.getUid();
         this.chattingRoomUid = chattingRoomParticipants.getChattingRoomUid();
         this.participantsUid = chattingRoomParticipants.getParticipantsUid();
         this.joinedDate = chattingRoomParticipants.getJoinedDate();
         this.leaveDate = chattingRoomParticipants.getLeaveDate();
+        this.connectYn = chattingRoomParticipants.getConnectYn();
+        this.unreadMessage = chattingRoomParticipants.getUnreadMessage();
     }
 }
