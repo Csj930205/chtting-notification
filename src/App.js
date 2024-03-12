@@ -1,24 +1,39 @@
-import logo from './logo.svg';
 import './App.css';
+import {BrowserRouter, Route, Routes} from "react-router-dom";
+import Sse from "./sse/sse";
+import Chatting from "./sse/chatting";
+import ChattingRoom from "./sse/chattingRoom";
+import Login from "./login/login";
+import SignIn from "./login/signIn";
+import BoardGroup from "./board/boardGroup";
+import BoardGroupCreate from "./board/boardGroupCreate";
+import BoardArticleCreate from "./board/boardArticleCreate";
+import BoardArticle from "./board/boardArticle";
+import MemberChatting from "./sse/memberChatting";
+import Header from "./header";
+import TestChatting from "./sse/testChatting";
+import {AuthProvider} from "./AuthContext";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+      <AuthProvider>
+        <BrowserRouter>
+          <Header/>
+          <Routes>
+            <Route path={'/'} element={<Login/>}/>
+            <Route path={'/sign'} element={<SignIn/>}/>
+            <Route path={'/board-group'} element={<BoardGroup/>}/>
+            <Route path={'/board-article'} element={<BoardArticle/>}/>
+            <Route path={'/board-article-create'} element={<BoardArticleCreate/>}/>
+            <Route path={'/board-group/create'} element={<BoardGroupCreate/>}/>
+            <Route path={'/see'} element={<Sse/>}/>
+            <Route path={'/testChatting'} element={<TestChatting/>}/>
+            <Route path={'/chatting'} element={<Chatting/>}/>
+            <Route path={'/member-chatting'} element={<MemberChatting/>}/>
+            <Route path={'/chatting-room'} element={<ChattingRoom/>}/>
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
   );
 }
 
