@@ -18,6 +18,7 @@ function MemberChatting(props) {
     const [roomUid, setRoomUid] = useState('');
     const [currentRoomUid, setCurrentRoomUid] = useState('');
     const {socketMessage} = useAuth();
+    const {notificationMessage} = useAuth();
     const [selectMember, setSelectMember] = useState([]);
     const [chattingStart, setChattingStart] = useState(false);
 
@@ -55,8 +56,7 @@ function MemberChatting(props) {
         console.log("/////////////" + selectedUser)
         client.current.send(`/pub/chat/send-message`, {}, JSON.stringify(data));
     }
-    console.log(socketMessage);
-
+    console.log(notificationMessage)
     useEffect(() => {
         axios.get(`http://192.168.3.93:8787/apis/member`, {withCredentials: true})
             .then(res => {
@@ -130,13 +130,13 @@ function MemberChatting(props) {
 
     useEffect(() => {
         isMyMessage();
-    }, [socketMessage]);
+    }, [notificationMessage]);
 
     const isMyMessage = (username) => {
-        if (!socketMessage || !socketMessage.length) {
+        if (!notificationMessage || !notificationMessage.length) {
             return false;
         }
-        const lastMessage = socketMessage[socketMessage.length - 1];
+        const lastMessage = notificationMessage[notificationMessage.length - 1];
         if (!lastMessage || !lastMessage.userList) {
             return false;
         }

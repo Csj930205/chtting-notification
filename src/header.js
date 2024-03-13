@@ -5,11 +5,13 @@ import './header.css';
 import {Stomp} from "@stomp/stompjs";
 
 function Header(props) {
-    const {user, logout, socketMessage} = useAuth();
+    const {user, logout, socketMessage, notificationMessage} = useAuth();
     const navigate = useNavigate();
     const [messages, setMessages] = useState([]);
     const [showDropdown, setShowDropdown] = useState(false);
     const [lastMessage, setLastMessage] = useState('');
+    const {clientNotification} = useAuth();
+    const savedCallBack = useRef();
 
     useEffect(() => {
         if (user) {
@@ -35,25 +37,35 @@ function Header(props) {
                 }
             }
         }
-
     }, [user]);
+
+    useEffect(() => {
+        console.log(clientNotification)
+        console.log(user)
+        if (user && clientNotification.current) {
+            const heartBeat = setInterval(() => {
+                const message = "PING";
+                clientNotification.current.send(`/pub/notification/heartbeat`, {}, message)
+            }, 10000);
+            return () => clearInterval(heartBeat);
+        }
+    }, []);
 
     const handlerMain = () => {
         logout();
         navigate('/')
     }
-    console.log(socketMessage)
 
     useEffect(() => {
         isMyMessage()
-    }, [socketMessage]);
+    }, [notificationMessage]);
 
     const isMyMessage = () => {
         if (user) {
-            if (!socketMessage || !socketMessage.length) {
+            if (!notificationMessage || !notificationMessage.length) {
                 return false;
             }
-            const lastMessage = socketMessage[socketMessage.length - 1];
+            const lastMessage = notificationMessage[notificationMessage.length - 1];
             if (!lastMessage || !lastMessage.userList) {
                 return false;
             }
