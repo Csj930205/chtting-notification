@@ -11,11 +11,14 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author sjChoi
@@ -27,6 +30,8 @@ public class ChatPreHandler implements ChannelInterceptor {
 
     private final ChattingRoomParticipantsRepository chattingRoomParticipantsRepository;
 
+    public static Map<String, List<String>> chattingUserList = new ConcurrentHashMap<>();
+
     @SneakyThrows
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -36,41 +41,30 @@ public class ChatPreHandler implements ChannelInterceptor {
             Authentication authentication = (Authentication) accessor.getHeader("simpUser");
             accessor.setUser(authentication);
             Member member = (Member) authentication.getPrincipal();
+            List<String> userList = chattingUserList.get("userList");
 
             if (StompCommand.CONNECT.equals(command) || StompCommand.SEND.equals(command) || StompCommand.MESSAGE.equals(command)) {
-                System.out.println("===========================");
-                System.out.println("인증객체: " + authentication);
-                System.out.println("===========================");
-
-                if (StompCommand.CONNECT.equals(command)) {
-                    List<String> userList = ChatMessageController.chattingUserList.get("userList");
-                    if (userList == null) {
-                        userList = new ArrayList<>();
-                        ChatMessageController.chattingUserList.put("userList", userList);
-                        userList.add(member.getUsername());
-                    }
-                    if (!userList.contains(member.getUsername())){
-                        userList.add(member.getUsername());
-                    }
-                }
-
-                List<String> userList = ChatMessageController.chattingUserList.get("userList");
-                System.out.println("현재 구독중인 구독자수: " + userList.size());
-
                 return message;
-            } else {
-                if (StompCommand.SUBSCRIBE.equals(command)) {
-                    List<String> userList = ChatMessageController.chattingUserList.get("userList");
-                    System.out.println("구독자수: " + userList.size());
+            }
+
+            if (StompCommand.SUBSCRIBE.equals(command)) {
+                if (userList == null || userList.size() == 0) {
+                    userList = new ArrayList<>();
                 }
-                if (StompCommand.DISCONNECT.equals(command)) {
-                    List<String> userList = ChatMessageController.chattingUserList.get("userList");
-                    if (userList != null) {
-                        userList.remove(member.getUsername());
-                        System.out.println("연결끊긴 후 구독자수: " + userList.size());
-                    }
+                if (!userList.contains(member.getUsername())) {
+                    userList.add(member.getUsername());
+                    chattingUserList.put("userList", userList);
+                    System.out.println("연결 후 구독자 수: " + userList.size());
+                }
+                return message;
+            }
+
+            if (StompCommand.DISCONNECT.equals(command)) {
+                if (userList != null && userList.contains(member.getUsername())) {
+                    userList.remove(member.getUsername());
+                    System.out.println("연결끊긴 후 구독자수: " + userList.size());
                     List<ChattingRoomParticipants> chattingRoomParticipantsList = chattingRoomParticipantsRepository.findByParticipantsUid(member.getUsername());
-                    if (chattingRoomParticipantsList != null) {
+                    if (chattingRoomParticipantsList != null && chattingRoomParticipantsList.size() > 0) {
                         for (ChattingRoomParticipants participants : chattingRoomParticipantsList) {
                             if (participants.getConnectYn().equals("Y")) {
                                 ChattingRoomParticipants chattingRoomParticipants = ChattingRoomParticipants.builder()

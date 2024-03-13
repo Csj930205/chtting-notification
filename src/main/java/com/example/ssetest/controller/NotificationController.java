@@ -32,7 +32,6 @@ public class NotificationController {
 
     private final NotificationService notificationService;
     public static Map<String, SseEmitter> boardSseEmitters = new ConcurrentHashMap<>();
-    public static Map<String, SseEmitter> notificationSseEmitters = new ConcurrentHashMap<>();
 
     private final ConsumerService consumerService;
 

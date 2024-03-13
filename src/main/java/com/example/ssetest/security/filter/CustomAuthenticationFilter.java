@@ -36,17 +36,9 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
         String token = tokenProvider.resolveToken(request);
 
         if (path.equals("/apis/member/login") || token == null) {
-            System.out.println("=====================");
-            System.out.println("로그인중");
-            System.out.println("로그인 path: " + path);
-            System.out.println("=====================");
             filterChain.doFilter(request, response);
         } else {
             setAuthentication(token);
-            System.out.println("=====================");
-            System.out.println("path: " + path);
-            System.out.println("필터통과");
-            System.out.println("=====================");
             filterChain.doFilter(request, response);
         }
     }
