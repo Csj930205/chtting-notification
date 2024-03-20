@@ -3,53 +3,51 @@ import {Link, useNavigate} from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import './header.css';
 import {Stomp} from "@stomp/stompjs";
+import axios from "axios";
 
 function Header(props) {
     const {user, logout, socketMessage, notificationMessage} = useAuth();
     const navigate = useNavigate();
     const [messages, setMessages] = useState([]);
     const [showDropdown, setShowDropdown] = useState(false);
-    const [lastMessage, setLastMessage] = useState('');
-    const {clientNotification} = useAuth();
-    const savedCallBack = useRef();
+    const [count, setConut] = useState(0);
+    const [notification, setNotification] = useState([]);
+
+    // useEffect(() => {
+    //     if (user) {
+    //         const eventSource = new EventSource(`http://192.168.3.93:8787/apis/notifications/subscribe/${user.username}`, {withCredentials: true});
+    //         try {
+    //             eventSource.onopen = () => {
+    //                 console.log('EventSources ReadyState', eventSource.readyState);
+    //                 console.log('EventSources url', eventSource.url);
+    //                 console.log('Open Event');
+    //             };
+    //             eventSource.addEventListener('boardArticle', (event) => {
+    //                 console.log('connect');
+    //                 setMessages((prevMessages) => [...prevMessages, event.data]);
+    //             });
+    //         } catch (err) {
+    //             eventSource.onerror = (error) => {
+    //                 console.log(error);
+    //             };
+    //         }
+    //         return () => {
+    //             if (eventSource) {
+    //                 eventSource.close();
+    //             }
+    //         }
+    //     }
+    // }, [user]);
 
     useEffect(() => {
         if (user) {
-            const eventSource = new EventSource(`http://192.168.3.93:8787/apis/notifications/subscribe/${user.username}`, {withCredentials: true});
-            try {
-                eventSource.onopen = () => {
-                    console.log('EventSources ReadyState', eventSource.readyState);
-                    console.log('EventSources url', eventSource.url);
-                    console.log('Open Event');
-                };
-                eventSource.addEventListener('boardArticle', (event) => {
-                    console.log('connect');
-                    setMessages((prevMessages) => [...prevMessages, event.data]);
-                });
-            } catch (err) {
-                eventSource.onerror = (error) => {
-                    console.log(error);
-                };
-            }
-            return () => {
-                if (eventSource) {
-                    eventSource.close();
-                }
-            }
+            const memberUid = user.username
+            axios.get(`http://192.168.3.93:8787/apis/unread/notification/${memberUid}`, {withCredentials: true})
+                .then((res) => {
+                    setConut(res.data.count)
+                })
         }
     }, [user]);
-
-    useEffect(() => {
-        console.log(clientNotification)
-        console.log(user)
-        if (user && clientNotification.current) {
-            const heartBeat = setInterval(() => {
-                const message = "PING";
-                clientNotification.current.send(`/pub/notification/heartbeat`, {}, message)
-            }, 10000);
-            return () => clearInterval(heartBeat);
-        }
-    }, []);
 
     const handlerMain = () => {
         logout();
@@ -58,6 +56,12 @@ function Header(props) {
 
     useEffect(() => {
         isMyMessage()
+        if (notificationMessage && notificationMessage.length > 0) {
+            const filterMessages = notificationMessage.filter(message => message.memberUid);
+            setNotification(filterMessages);
+        } else {
+            setNotification([]);
+        }
     }, [notificationMessage]);
 
     const isMyMessage = () => {
@@ -75,6 +79,16 @@ function Header(props) {
         }
     }
 
+    const handleCount = () => {
+        if(user) {
+            const memberUid = user.username
+            axios.delete(`http://192.168.3.93:8787/apis/unread/${memberUid}`, {withCredentials: true})
+                .then((res) => {
+                    setConut(0);
+                })
+        }
+    }
+
     return (
         <div className='header-container'>
             <Link to="/">홈</Link>
@@ -87,14 +101,16 @@ function Header(props) {
             </div>
             {user && (
                 <div className='dropdown' onClick={() => setShowDropdown(!showDropdown)}>
-                    <span>({messages.length})</span>
+                    <span>방금온 메시지: ({notification.length})</span>
                     {showDropdown && (
                         <ul>
-                            {messages.map((messages, index) => (
-                                <li key={index}>{messages}</li>
+                            {notification.map((messages, index) => (
+                                <li key={index}>{messages.message}</li>
                             ))}
                         </ul>
                     )}
+                    <br/>
+                    <span onClick={handleCount}>읽지않은 메시지: ({count})</span>
                 </div>
             )}
         </div>

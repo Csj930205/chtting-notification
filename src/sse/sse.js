@@ -62,6 +62,10 @@ function Sse(props) {
         navigate('/member-chatting')
     }
 
+    const errorList = () => {
+        axios.get(`http://192.168.3.93:8787/apis/error/error-list`, {withCredentials: true})
+    }
+
     return (
         <div>
             <br/>
@@ -71,7 +75,10 @@ function Sse(props) {
             <button onClick={memberChattingRoom}>회원채팅방으로 이동</button>
             <br/>
             <br/>
-            <button onClick={list}>데이터 받아오기</button>
+            <button onClick={list}>알림 데이터 받아오기</button>
+            <br/>
+            <br/>
+            <button onClick={errorList}>에러 데이터 받아오기</button>
             <br/>
             <br/>
             <button onClick={redirectBoardGroup}>게시판 그룹으로 이동</button>
