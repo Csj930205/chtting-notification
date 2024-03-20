@@ -14,7 +14,7 @@
 
             <!--      local      -->
             <springProfile name="local">
-                <fileNamePattern>${user.home}/test/test_log/test-log.%d{yyyy-MM-dd}.log</fileNamePattern>
+                <fileNamePattern>${user.home}/error_log/error-log.%d{yyyy-MM-dd}.log</fileNamePattern>
             </springProfile>
 
             <!-- 최대 로그파일 보관 갯수 설정   -->

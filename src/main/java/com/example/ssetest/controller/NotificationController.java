@@ -1,8 +1,6 @@
 package com.example.ssetest.controller;
 
-import com.example.ssetest.domain.ChatMessage;
 import com.example.ssetest.domain.NotificationMessage;
-import com.example.ssetest.service.ConsumerService;
 import com.example.ssetest.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -11,13 +9,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import reactor.core.publisher.Flux;
 
-import javax.imageio.IIOException;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -33,7 +29,6 @@ public class NotificationController {
     private final NotificationService notificationService;
     public static Map<String, SseEmitter> boardSseEmitters = new ConcurrentHashMap<>();
 
-    private final ConsumerService consumerService;
 
     @GetMapping(value = "/apis/notifications/subscribe/{username}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter subscribe(@PathVariable(value = "username") String username, @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "") String lastEventId) {

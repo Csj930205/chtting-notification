@@ -117,10 +117,9 @@ public class ChatMessageController {
 
     @Scheduled(fixedRate = 10000)
     public void pushWebSocket() {
-        System.out.println("1분마다 실행되야함");
         List<String> chattingUserList = ChatPreHandler.chattingUserList.get("userList");
         if (chattingUserList != null && chattingUserList.size() > 0) {
-            System.out.println("구독자수: " + chattingUserList.size());
+            System.out.println("현재 접속자수: " + chattingUserList.size());
             for (Map.Entry<String, List<String>> entry : ChatPreHandler.chattingUserList.entrySet()) {
                 for (String userList : entry.getValue()) {
                     simpMessageSendingOperations.convertAndSend("/notification?userId=" + userList, ChatPreHandler.chattingUserList);

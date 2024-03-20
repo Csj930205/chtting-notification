@@ -1,6 +1,5 @@
 package com.example.ssetest.util;
 
-import com.example.ssetest.controller.ChatMessageController;
 import com.example.ssetest.domain.ChattingRoomParticipants;
 import com.example.ssetest.domain.Member;
 import com.example.ssetest.repository.ChattingRoomParticipantsRepository;
@@ -11,7 +10,6 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
-import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 

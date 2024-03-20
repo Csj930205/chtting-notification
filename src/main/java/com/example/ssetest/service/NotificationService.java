@@ -1,10 +1,8 @@
 package com.example.ssetest.service;
 
 import com.example.ssetest.controller.NotificationController;
-import com.example.ssetest.domain.BoardArticle;
-import com.example.ssetest.domain.BoardGroup;
-import com.example.ssetest.domain.BoardGroupUser;
-import com.example.ssetest.domain.NotificationMessage;
+import com.example.ssetest.domain.*;
+import com.example.ssetest.util.ChatPreHandler;
 import com.example.ssetest.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +15,7 @@ import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -43,6 +42,67 @@ public class NotificationService {
 
     private final KafkaTemplate<String, NotificationMessage> kafkaTemplate;
 
+    private final MemberService memberService;
+
+    private final UnreadNotificationService unreadNotificationService;
+
+    private final SimpMessageSendingOperations simpMessageSendingOperations;
+
+    public void notificationMessage(BoardArticle boardArticle) {
+        BoardGroup boardGroup = boardGroupService.detailBoardGroup(boardArticle.getBoardGroupUid());
+        String message = boardArticle.getCreatedBy() + "님이 " + boardGroup.getName() + " 그룹에 게시글을 작성하였습니다.";
+        NotificationMessage notificationMessage = NotificationMessage.builder()
+                .message(message)
+                .memberUid(boardArticle.getCreatedBy())
+                .build();
+        List<Member> memberList = memberService.memberList();
+
+        if (boardGroup.getMandatory().equals("Y")) {
+            for (Map.Entry<String, List<String>> entry : ChatPreHandler.chattingUserList.entrySet()) {
+                for (String userList : entry.getValue()) {
+                    simpMessageSendingOperations.convertAndSend("/notification?userId=" + userList, notificationMessage);
+                }
+            }
+            for (Member member : memberList) {
+                if (!ChatPreHandler.chattingUserList.get("userList").contains(member.getUsername())) {
+                    UnreadNotification unreadNotification = UnreadNotification.builder()
+                            .memberUid(member.getUsername())
+                            .parentUid(boardArticle.getUid())
+                            .message(message)
+                            .build();
+                    unreadNotificationService.insertUnreadNotification(unreadNotification);
+                }
+            }
+        } else {
+            List<BoardGroupUser> boardGroupUserList = boardGroupUserService.findByBoardGroupUid(boardArticle.getBoardGroupUid());
+            for (BoardGroupUser boardGroupUser : boardGroupUserList) {
+                try {
+                    for (Map.Entry<String, List<String>> entry : ChatPreHandler.chattingUserList.entrySet()) {
+                        for (String userList : entry.getValue()) {
+                            simpMessageSendingOperations.convertAndSend("/notification?userId=" + userList, notificationMessage);
+                        }
+                    }
+                    if (!ChatPreHandler.chattingUserList.get("userList").contains(boardGroupUser.getBoardGroupUsername())) {
+                        UnreadNotification unreadNotification = UnreadNotification.builder()
+                                .memberUid(boardGroupUser.getBoardGroupUsername())
+                                .parentUid(boardArticle.getUid())
+                                .message(message)
+                                .build();
+                        unreadNotificationService.insertUnreadNotification(unreadNotification);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        try {
+            ProducerRecord<String, NotificationMessage> record = new ProducerRecord<>("gw-notification-topic",0,  boardArticle.getCreatedBy(), notificationMessage);
+            kafkaTemplate.send(record);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 
     public SseEmitter subscribe(String username, String lastEventId) {
         SseEmitter sseEmitter = new SseEmitter(DEFAULT_TIMEOUT);
@@ -71,16 +131,29 @@ public class NotificationService {
         String message = boardArticle.getCreatedBy() + "님이 " + boardGroup.getName() + " 그룹에 게시글을 작성하였습니다.";
         NotificationMessage notificationMessage = NotificationMessage.builder()
                 .message(message)
-                .groupMemberUid(boardArticle.getCreatedBy())
+                .memberUid(boardArticle.getCreatedBy())
                 .build();
+        List<Member> memberList = memberService.memberList();
 
         if (boardGroup.getMandatory().equals("Y")) {
             for (Map.Entry<String, SseEmitter> entry : NotificationController.boardSseEmitters.entrySet()) {
                 SseEmitter sseEmitter = entry.getValue();
                 try {
-                    sseEmitter.send(SseEmitter.event().id(String.valueOf(boardArticle.getUid())).name("boardArticle").data(message));
+                    if (sseEmitter != null) {
+                        sseEmitter.send(SseEmitter.event().id(String.valueOf(boardArticle.getUid())).name("boardArticle").data(message));
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
+                }
+            }
+            for (Member member : memberList) {
+                if (!NotificationController.boardSseEmitters.containsKey(member.getUsername())) {
+                    UnreadNotification unreadNotification = UnreadNotification.builder()
+                            .memberUid(member.getUsername())
+                            .parentUid(boardArticle.getUid())
+                            .message(message)
+                            .build();
+                    unreadNotificationService.insertUnreadNotification(unreadNotification);
                 }
             }
         } else {
@@ -90,6 +163,13 @@ public class NotificationService {
                     SseEmitter sseEmitter = NotificationController.boardSseEmitters.get(boardGroupUser.getBoardGroupUsername());
                     if (sseEmitter != null) {
                         sseEmitter.send(SseEmitter.event().id(String.valueOf(boardArticle.getUid())).name("boardArticle").data(message));
+                    } else {
+                        UnreadNotification unreadNotification = UnreadNotification.builder()
+                                .memberUid(boardGroupUser.getBoardGroupUsername())
+                                .parentUid(boardArticle.getUid())
+                                .message(message)
+                                .build();
+                        unreadNotificationService.insertUnreadNotification(unreadNotification);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

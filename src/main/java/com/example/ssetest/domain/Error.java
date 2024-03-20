@@ -1,6 +1,6 @@
 package com.example.ssetest.domain;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,25 +9,21 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-import java.io.Serializable;
-import java.util.Date;
-
 /**
- * 알림 메세지
  * @author sjChoi
- * @since 2/7/24
+ * @since 3/18/24
  */
 @Getter
 @Builder(toBuilder = true)
-@Document(indexName = "gw-notification-topic*")
+@Document(indexName = "gw-log-*")
 @NoArgsConstructor
 @AllArgsConstructor
-public class NotificationMessage implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class Error {
 
-    @Field(type = FieldType.Text)
-    private String memberUid;
+    @Id
+    private String id;
 
     @Field(type = FieldType.Text)
     private String message;
+
 }

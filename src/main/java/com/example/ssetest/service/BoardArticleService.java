@@ -37,7 +37,8 @@ public class BoardArticleService {
     @Transactional
     public int insertBoardArticle(BoardArticle boardArticle) {
         boardArticleRepository.save(boardArticle);
-        notificationService.notificationBoard(boardArticle);
+//        notificationService.notificationBoard(boardArticle);
+        notificationService.notificationMessage(boardArticle);
         return 1;
     }
 }
