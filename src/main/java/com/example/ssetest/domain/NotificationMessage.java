@@ -25,8 +25,14 @@ import java.util.Date;
 public class NotificationMessage implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    @Field(type = FieldType.Long)
+    private Long parentUid;
+
     @Field(type = FieldType.Text)
     private String memberUid;
+
+    @Field(type = FieldType.Text)
+    private String type;
 
     @Field(type = FieldType.Text)
     private String message;

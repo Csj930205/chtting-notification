@@ -35,7 +35,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         String token = tokenProvider.resolveToken(request);
 
-        if (path.equals("/apis/member/login") || token == null) {
+        if (path.equals("/apis/member/login") || path.equals("/apis/member/signin") || token == null) {
             filterChain.doFilter(request, response);
         } else {
             setAuthentication(token);

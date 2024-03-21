@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -48,10 +47,16 @@ public class NotificationService {
 
     private final SimpMessageSendingOperations simpMessageSendingOperations;
 
+    /**
+     * 웹소켓
+     * @param boardArticle
+     */
     public void notificationMessage(BoardArticle boardArticle) {
         BoardGroup boardGroup = boardGroupService.detailBoardGroup(boardArticle.getBoardGroupUid());
         String message = boardArticle.getCreatedBy() + "님이 " + boardGroup.getName() + " 그룹에 게시글을 작성하였습니다.";
         NotificationMessage notificationMessage = NotificationMessage.builder()
+                .parentUid(boardArticle.getUid())
+                .type("boardArticle")
                 .message(message)
                 .memberUid(boardArticle.getCreatedBy())
                 .build();
@@ -101,9 +106,14 @@ public class NotificationService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
+    /**
+     * SSE
+     * @param username
+     * @param lastEventId
+     * @return
+     */
     public SseEmitter subscribe(String username, String lastEventId) {
         SseEmitter sseEmitter = new SseEmitter(DEFAULT_TIMEOUT);
         try {
