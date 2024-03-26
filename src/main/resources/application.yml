@@ -20,6 +20,14 @@ spring:
         hbm2ddl:
           auto: none
 
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+  file-upload:
+    upload-path: ${user.home}/chatting_attach
+
 server:
   port: 8787
   address: 192.168.3.93

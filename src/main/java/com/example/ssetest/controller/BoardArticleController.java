@@ -32,13 +32,13 @@ public class BoardArticleController {
         return detailBoardArticle;
     }
 
-    @PostMapping
-    public String saveBoardArticle(@RequestBody BoardArticle boardArticle) {
-        int saveBoardArticle = boardArticleService.insertBoardArticle(boardArticle);
-        if (saveBoardArticle == 1) {
-            return "success";
-        } else {
-            return "fail";
-        }
-    }
+//    @PostMapping
+//    public String saveBoardArticle(@RequestBody BoardArticle boardArticle) {
+//        int saveBoardArticle = boardArticleService.insertBoardArticle(boardArticle);
+//        if (saveBoardArticle == 1) {
+//            return "success";
+//        } else {
+//            return "fail";
+//        }
+//    }
 }

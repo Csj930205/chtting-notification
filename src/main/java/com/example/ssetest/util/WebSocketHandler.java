@@ -14,6 +14,7 @@
 //import org.springframework.web.socket.handler.TextWebSocketHandler;
 //
 //import java.util.ArrayList;
+//import java.util.HashMap;
 //import java.util.List;
 //import java.util.Map;
 //import java.util.concurrent.ConcurrentHashMap;
@@ -51,19 +52,20 @@
 //        System.out.println("연결 끊김");
 //    }
 //
-//
-//
 //    @Override
 //    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
 //        ChatMessage chatMessage = objectMapper.readValue(message.getPayload(), ChatMessage.class);
 //        List<ChattingRoomParticipants> participantsList = chattingRoomParticipantsRepository.findByChattingRoomUid(Long.valueOf(chatMessage.getRoomUid()));
+//        Map<String, Object> result = new HashMap<>();
+//        result.put("type", "chatting-message");
+//        result.put("body", chatMessage);
 //
 //        for (ChattingRoomParticipants participants : participantsList) {
 //            String userId = participants.getParticipantsUid();
 //            List<WebSocketSession> sessions = userList.get(userId);
 //            if (sessions != null) {
 //                for (WebSocketSession receiverSession : sessions) {
-//                    receiverSession.sendMessage(new TextMessage(objectMapper.writeValueAsString(chatMessage)));
+//                    receiverSession.sendMessage(new TextMessage(objectMapper.writeValueAsString(result)));
 //                }
 //            }
 //        }

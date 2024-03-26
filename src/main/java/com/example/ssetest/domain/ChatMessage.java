@@ -40,4 +40,5 @@ public class ChatMessage implements Serializable {
 
     @Field(name = "@timestamp", type = FieldType.Date)
     private Date timestamp;
+    
 }
