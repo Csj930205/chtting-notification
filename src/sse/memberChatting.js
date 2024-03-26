@@ -2,8 +2,6 @@ import React, {useEffect, useRef, useState} from 'react';
 import {useNavigate} from "react-router-dom";
 import {useAuth} from "../AuthContext";
 import axios from "axios";
-import {Stomp} from "@stomp/stompjs";
-import {Base64} from "js-base64";
 
 function MemberChatting(props) {
     const navigate = useNavigate();
@@ -21,6 +19,7 @@ function MemberChatting(props) {
     const {notificationMessage} = useAuth();
     const [selectMember, setSelectMember] = useState([]);
     const [chattingStart, setChattingStart] = useState(false);
+    const [attach, setAttach] = useState(null)
 
     const handleSelectMember = (uid) => {
         if (selectMember.includes(uid)) {
@@ -73,6 +72,33 @@ function MemberChatting(props) {
 
     const redirect = () => {
         navigate('/see')
+    }
+
+    const handleFileSelect = (event) => {
+        const file = event.target.files[0];
+        if (!file) {
+            return;
+        }
+        setAttach(file);
+    }
+    const sendFile = (currentRoomUid) => {
+        if (!attach) {
+            return;
+        }
+        const formData = new FormData();
+        const data = {
+            uid: currentRoomUid,
+            tableType : 'chatting'
+        }
+        const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
+        formData.append('chattingRoom', blob);
+        formData.append('uploadFile', attach)
+        axios.post(`http://192.168.3.93:8787/apis/attaches/upload`, formData, {withCredentials: true})
+            .then((res) => {
+                if(res.data.result === 'success') {
+                    console.log(res.data.url)
+                }
+            })
     }
 
     const getChattingMessage = (uid) => {
@@ -232,6 +258,8 @@ function MemberChatting(props) {
                     </ul>
                     <input value={inputMessage} onChange={handleInputMessage}/>
                     <button onClick={handleSendMessage}>입력</button>
+                    <input type="file" onChange={handleFileSelect}/>
+                    <button onClick={() => sendFile(currentRoomUid)}>전송</button>
                 </div>
             }
             <br/>

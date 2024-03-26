@@ -8,6 +8,7 @@ function TestChatting(props) {
     const [selectMember, setSelectMember] = useState('');
     const [socket, setSocket] = useState(null);
     const [inputMessage, setInputMessage] = useState('');
+    const [attach, setAttach] = useState(null);
 
     useEffect(() => {
         axios.get(`http://192.168.3.93:8787/apis/member`, {withCredentials: true})
@@ -53,7 +54,7 @@ function TestChatting(props) {
     const handleSendMessage = () => {
         setInputMessage('');
         const data = {
-            roomUid: 4,
+            roomUid: 1,
             content: inputMessage,
             senderUid: user.username
         }
@@ -67,6 +68,41 @@ function TestChatting(props) {
                 socket.send(JSON.stringify(data))
             }
         }
+    }
+
+    const handleFileSelect = (event) => {
+        const file = event.target.files[0];
+        if (!file) {
+            return;
+        }
+        setAttach(file);
+    }
+
+    const sendAttach = () => {
+        if (!attach) {
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const binaryData = e.target.result;
+            const data = {
+                roomUid: 1,
+                content: '',
+                senderUid: user.username,
+                attach: binaryData
+            }
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                if (selectMember) {
+                    socket.send(JSON.stringify({
+                        ...data,
+                        receiverUid: selectMember
+                    }))
+                } else {
+                    socket.send(JSON.stringify(data))
+                }
+            }
+        }
+        reader.readAsArrayBuffer(attach);
     }
     return (
         <div>
@@ -91,6 +127,8 @@ function TestChatting(props) {
             </table>
             <input value={inputMessage} onChange={handleInputMessage}/>
             <button type='button' onClick={handleSendMessage}>보내기</button>
+            <input type='file' onChange={handleFileSelect}/>
+            <button type='button' onClick={sendAttach}>전송</button>
         </div>
     );
 }

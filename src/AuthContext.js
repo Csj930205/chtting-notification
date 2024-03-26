@@ -78,6 +78,7 @@ export const AuthProvider = ({ children }) => {
         if (client.current) {
             client.current.disconnect();
             setSocketMessage([]);
+            setNotificationMessage([])
         }
         if (!client.current) {
             clientNotification.current.disconnect();

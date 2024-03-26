@@ -73,7 +73,6 @@ function Header(props) {
             if (!lastMessage || !lastMessage.userList) {
                 return false;
             }
-
             const isUserInclueded = lastMessage.userList.includes(user.username);
             return isUserInclueded
         }
@@ -93,8 +92,7 @@ function Header(props) {
         <div className='header-container'>
             <Link to="/">홈</Link>
             <div className='user-info'>
-                <li style={{backgroundColor: isMyMessage() ? 'green' : 'red'}}></li>
-
+                {user && <li style={{backgroundColor: isMyMessage() ? 'green' : 'red'}}></li>}
                 {user && <span>{user.username} 님 </span>}
                 {user && <button onClick={handlerMain}>로그아웃</button>}
                 {user && <Link to={"/login"}></Link>}
