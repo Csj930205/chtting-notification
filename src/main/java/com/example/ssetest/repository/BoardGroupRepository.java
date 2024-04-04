@@ -13,6 +13,8 @@ public interface BoardGroupRepository extends JpaRepository<BoardGroup, Long> {
 
     List<BoardGroup> findAll();
 
+    List<BoardGroup> findAllByMandatory(String mandatory);
+
     BoardGroup findByName(String name);
 
     BoardGroup findByUid(Long uid);

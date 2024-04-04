@@ -2,6 +2,8 @@ package com.example.ssetest.service;
 
 import com.example.ssetest.controller.NotificationController;
 import com.example.ssetest.domain.*;
+import com.example.ssetest.repository.BoardGroupRepository;
+import com.example.ssetest.repository.BoardGroupUserRepository;
 import com.example.ssetest.util.ChatPreHandler;
 import com.example.ssetest.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
@@ -16,11 +18,14 @@ import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author sjChoi
@@ -35,7 +40,11 @@ public class NotificationService {
 
     private final BoardGroupService boardGroupService;
 
+    private final BoardGroupRepository boardGroupRepository;
+
     private final BoardGroupUserService boardGroupUserService;
+
+    private final BoardGroupUserRepository boardGroupUserRepository;
 
     private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60;
 
@@ -51,11 +60,13 @@ public class NotificationService {
      * 웹소켓
      * @param boardArticle
      */
+    @Async
     public void notificationMessage(BoardArticle boardArticle) {
         BoardGroup boardGroup = boardGroupService.detailBoardGroup(boardArticle.getBoardGroupUid());
         String message = boardArticle.getCreatedBy() + "님이 " + boardGroup.getName() + " 그룹에 게시글을 작성하였습니다.";
         NotificationMessage notificationMessage = NotificationMessage.builder()
-                .parentUid(boardArticle.getUid())
+                .boardGroupUid(boardGroup.getUid())
+                .boardArticleUid(boardArticle.getUid())
                 .type("boardArticle")
                 .message(message)
                 .memberUid(boardArticle.getCreatedBy())
@@ -200,13 +211,23 @@ public class NotificationService {
      * @throws IOException
      */
     public List<NotificationMessage> getAllNotification(Map<String, Object> paramMap) throws IOException {
+        String memberUid = SecurityUtil.getCurrentMember().getUsername();
+        // 사용자가 속한 그룹 ID 조회
+        List<Long> userGroupUid = boardGroupUserRepository.findByBoardGroupUsername(memberUid)
+                .stream().map(BoardGroupUser::getBoardGroupUid).collect(Collectors.toList());
+        // 필수 그룹 조회
+        List<Long> mandatoryGroupUid = boardGroupRepository.findAllByMandatory("Y")
+                .stream().map(BoardGroup::getUid).collect(Collectors.toList());
+        // 리스트 합침
+        Set<Long> relevantGroupUid = new HashSet<>();
+        relevantGroupUid.addAll(userGroupUid);
+        relevantGroupUid.addAll(mandatoryGroupUid);
+        Criteria criteria = new Criteria("boardGroupUid").in(relevantGroupUid).and("type").is("boardArticle");
+
         List<NotificationMessage> notificationMessageList = new ArrayList<>();
-        Criteria criteria;
         if (paramMap.containsKey("title")) {
             String title = paramMap.get("title").toString();
-            criteria = new Criteria("message").contains(title);
-        } else {
-            criteria = new Criteria();
+            criteria = criteria.and("message").contains(title);
         }
 
         CriteriaQuery query;

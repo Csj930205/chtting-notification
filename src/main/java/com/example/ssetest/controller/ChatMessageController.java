@@ -17,6 +17,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +43,9 @@ public class ChatMessageController {
     public void chatMessage (@Payload ChatMessage chatMessage) {
         ProducerRecord<String, ChatMessage> record = new ProducerRecord<>("gw-chat-topic", 0, chatMessage.getRoomUid(), chatMessage);
         kafkaTemplate.send(record);
+//        Map<String, Object> result = new HashMap<>();
+//        result.put("type", "chatting");
+//        result.put("body", chatMessage);
         List<ChattingRoomParticipants> participantsList = chattingRoomParticipantsRepository.findByChattingRoomUid(Long.valueOf(chatMessage.getRoomUid()));
         List<String> userList = ChatPreHandler.chattingUserList.get("userList");
         for (ChattingRoomParticipants participants : participantsList) {

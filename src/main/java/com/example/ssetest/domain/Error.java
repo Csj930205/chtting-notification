@@ -20,8 +20,8 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 @AllArgsConstructor
 public class Error {
 
-    @Id
-    private String id;
+//    @Id
+//    private String id;
 
     @Field(type = FieldType.Text)
     private String message;

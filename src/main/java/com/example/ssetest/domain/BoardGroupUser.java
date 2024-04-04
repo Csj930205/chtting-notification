@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.util.Date;
 
 /**
  * @author sjChoi
@@ -24,4 +27,8 @@ public class BoardGroupUser {
 
     @Column(name = "board_group_username")
     private String boardGroupUsername;
+
+    @Column(name = "joined_date", updatable = false)
+    @CreationTimestamp
+    private Date joinedDate;
 }

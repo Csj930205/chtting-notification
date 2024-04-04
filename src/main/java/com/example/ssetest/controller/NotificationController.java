@@ -23,7 +23,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://localhost:3000", " http://localhost:8787"})
 public class NotificationController {
 
     private final NotificationService notificationService;

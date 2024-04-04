@@ -26,7 +26,10 @@ public class NotificationMessage implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Field(type = FieldType.Long)
-    private Long parentUid;
+    private Long boardGroupUid;
+
+    @Field(type = FieldType.Long)
+    private Long boardArticleUid;
 
     @Field(type = FieldType.Text)
     private String memberUid;

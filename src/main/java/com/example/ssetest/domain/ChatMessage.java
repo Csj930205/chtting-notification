@@ -26,8 +26,8 @@ import java.util.Date;
 public class ChatMessage implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    @Id
-    private String id;
+//    @Id
+//    private String id;
 
     @Field(type = FieldType.Text)
     private String roomUid;

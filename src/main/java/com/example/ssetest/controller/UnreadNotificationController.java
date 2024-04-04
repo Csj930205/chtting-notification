@@ -1,11 +1,13 @@
 package com.example.ssetest.controller;
 
+import com.example.ssetest.domain.UnreadNotification;
 import com.example.ssetest.service.UnreadNotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,19 +24,21 @@ public class UnreadNotificationController {
     @GetMapping("/notification/{memberUid}")
     public Map<String, Object> unreadNotificationCount(@PathVariable(value = "memberUid") String memberUid) {
         Map<String, Object> result = new HashMap<>();
-        int count = unreadNotificationService.countUnreadNotification(memberUid);
+        Map<String, Object> countUnreadNotification = unreadNotificationService.countUnreadNotification(memberUid);
         result.put("result", "success");
         result.put("code", HttpStatus.OK.value());
-        result.put("count", count);
+        result.put("count", countUnreadNotification.get("count"));
+        result.put("unreadNotificationList", countUnreadNotification.get("list"));
         return result;
     }
 
     @DeleteMapping("{memberUid}")
     public Map<String, Object> deleteUnreadNotification(@PathVariable(value = "memberUid") String memberUid) {
         Map<String, Object> result = new HashMap<>();
-        unreadNotificationService.deleteUnreadNotification(memberUid);
+        List<UnreadNotification> unreadNotificationList = unreadNotificationService.deleteUnreadNotification(memberUid);
         result.put("result", "success");
         result.put("code", HttpStatus.OK.value());
+        result.put("unreadNotification", unreadNotificationList);
         return result;
     }
 }
