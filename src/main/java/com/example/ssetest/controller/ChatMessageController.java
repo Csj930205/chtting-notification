@@ -50,7 +50,7 @@ public class ChatMessageController {
         List<String> userList = ChatPreHandler.chattingUserList.get("userList");
         for (ChattingRoomParticipants participants : participantsList) {
             ChattingRoomParticipants detailParticipants = chattingRoomParticipantsRepository.findByChattingRoomUidAndParticipantsUid(participants.getChattingRoomUid(), participants.getParticipantsUid());
-            if (userList.contains(participants.getParticipantsUid())) {
+            if (userList.contains(participants.getParticipantsUid()) && participants.getConnectYn().equals("Y")) {
                 simpMessageSendingOperations.convertAndSend("/chat?userId=" + participants.getParticipantsUid(), chatMessage);
                 if (detailParticipants.getConnectYn().equals("N")) {
                     ChattingRoomParticipants chattingRoomParticipants = ChattingRoomParticipants.builder()
