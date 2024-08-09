@@ -32,7 +32,7 @@ function BoardArticleCreate(props) {
             createdBy : user.username,
             content : content
         }
-        axios.post(`http://192.168.3.93:8787/apis/board-article`, data, {withCredentials: true})
+        axios.post(`http://localhost:8787/apis/board-article`, data, {withCredentials: true})
             .then(response => {
                 if (response.data === 'success') {
                     alert('등록 성공')

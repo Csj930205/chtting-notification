@@ -11,12 +11,12 @@ function TestChatting(props) {
     const [attach, setAttach] = useState(null);
 
     useEffect(() => {
-        axios.get(`http://192.168.3.93:8787/apis/member`, {withCredentials: true})
+        axios.get(`http://localhost:8787/apis/member`, {withCredentials: true})
             .then(res => {
                 setMemberList(res.data)
             })
         if (user) {
-            const chatWebsocket = new WebSocket(`ws://192.168.3.93:8787/chat?userId=${user.username}`)
+            const chatWebsocket = new WebSocket(`ws://localhost:8787/chat?userId=${user.username}`)
             // 연결이 열릴 때
             chatWebsocket.onopen = () => {
                 console.log("WebSocket 연결됨");

@@ -15,7 +15,7 @@ function Sse(props) {
 
     console.log(user)
     const connect = () => {
-        const eventSource = new EventSource(`http://192.168.3.93:8787/apis/notifications/subscribe/${user.username}`, {
+        const eventSource = new EventSource(`http://localhost:8787/apis/notifications/subscribe/${user.username}`, {
             withCredentials: true,
         });
         try {
@@ -41,13 +41,13 @@ function Sse(props) {
     };
 
     const send = () => {
-        axios.get(`http://192.168.3.93:8787/apis/test/${user.username}`, { withCredentials: true }).then((res) => {
+        axios.get(`http://localhost:8787/apis/test/${user.username}`, { withCredentials: true }).then((res) => {
             console.log(res.data);
         });
     };
 
     const list = () => {
-        axios.get(`http://192.168.3.93:8787/apis/list`, { withCredentials: true });
+        axios.get(`http://localhost:8787/apis/list`, { withCredentials: true });
     };
 
     const redirect = () => {
@@ -63,7 +63,7 @@ function Sse(props) {
     }
 
     const errorList = () => {
-        axios.get(`http://192.168.3.93:8787/apis/error/error-list`, {withCredentials: true})
+        axios.get(`http://localhost:8787/apis/error/error-list`, {withCredentials: true})
     }
 
     return (

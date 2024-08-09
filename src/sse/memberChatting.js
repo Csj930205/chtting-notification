@@ -20,6 +20,7 @@ function MemberChatting(props) {
     const [selectMember, setSelectMember] = useState([]);
     const [chattingStart, setChattingStart] = useState(false);
     const [attach, setAttach] = useState(null)
+    const [attachUrl, setAttachUrl] = useState(null);
 
     const handleSelectMember = (uid) => {
         if (selectMember.includes(uid)) {
@@ -57,14 +58,14 @@ function MemberChatting(props) {
     }
     console.log(notificationMessage)
     useEffect(() => {
-        axios.get(`http://192.168.3.93:8787/apis/member`, {withCredentials: true})
+        axios.get(`http://localhost:8787/apis/member`, {withCredentials: true})
             .then(res => {
                 setMemberList(res.data)
             })
             .catch(error => {
                 console.error(error)
             })
-        axios.get(`http://192.168.3.93:8787/apis/chatting-room/my-list`, {withCredentials: true})
+        axios.get(`http://localhost:8787/apis/chatting-room/my-list`, {withCredentials: true})
             .then(res => {
                 setChattingRoomList(res.data.chattingRoomList);
             })
@@ -93,16 +94,18 @@ function MemberChatting(props) {
         const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
         formData.append('chattingRoom', blob);
         formData.append('uploadFile', attach)
-        axios.post(`http://192.168.3.93:8787/apis/attaches/upload`, formData, {withCredentials: true})
+        axios.post(`http://localhost:8787/apis/attaches/upload`, formData, {withCredentials: true})
             .then((res) => {
                 if(res.data.result === 'success') {
                     console.log(res.data.url)
+                    const url = 'http://localhost:8787' + res.data.url
+                    setAttachUrl(url)
                 }
             })
     }
 
     const getChattingMessage = (uid) => {
-        axios.get(`http://192.168.3.93:8787/apis/chatting-list/${uid}`, {withCredentials: true})
+        axios.get(`http://localhost:8787/apis/chatting-list/${uid}`, {withCredentials: true})
             .then(res => {
                 setMessages(prevMessages => [...prevMessages, ...res.data])
             })
@@ -116,7 +119,7 @@ function MemberChatting(props) {
             participants: selectMember,
             createdBy: createdBy
         }
-        axios.post(`http://192.168.3.93:8787/apis/chatting-room`, data, {withCredentials: true})
+        axios.post(`http://localhost:8787/apis/chatting-room`, data, {withCredentials: true})
             .then(res => {
                 if (res.data.result === 'success') {
                     setSelectMember([]);
@@ -148,7 +151,7 @@ function MemberChatting(props) {
             chattingRoomUid : uid,
             participantsUid : user.username
         }
-        axios.put(`http://192.168.3.93:8787/apis/chatting-room/leave`, data, {withCredentials: true})
+        axios.put(`http://localhost:8787/apis/chatting-room/leave`, data, {withCredentials: true})
     }
     const handleDropdownToggle = () => {
         setShowDropDown(prevState => !prevState);
@@ -267,6 +270,11 @@ function MemberChatting(props) {
             <br/>
             <br/>
             <br/>
+            {attachUrl &&
+                <div>
+                    <img src={attachUrl}/>
+                </div>
+            }
         </div>
     );
 }

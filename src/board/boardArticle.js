@@ -11,7 +11,7 @@ function BoardArticle(props) {
     const [boardArticleList, setBoardArticleList] = useState([]);
 
     useEffect(() => {
-        axios.get(`http://192.168.3.93:8787/apis/board-article/${boardGroupUid}`, {withCredentials: true})
+        axios.get(`http://localhost:8787/apis/board-article/${boardGroupUid}`, {withCredentials: true})
             .then(response => {
                 setBoardArticleList(response.data)
             })

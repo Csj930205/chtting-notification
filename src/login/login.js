@@ -3,7 +3,7 @@ import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import {useAuth} from "../AuthContext";
 
-function Login(props) {
+function Login() {
     const navigate = useNavigate();
     const {login} = useAuth();
     const [username, setUserName] = useState('최성준');
@@ -14,7 +14,7 @@ function Login(props) {
             username : username,
             password : password
         }
-        axios.post(`http://192.168.3.93:8787/apis/member/login`, data, {withCredentials: true})
+        axios.post(`http://localhost:8787/apis/member/login`, data, {withCredentials: true})
             .then(response => {
                 if(response.data != null) {
                     alert('로그인이 성공하였습니다.')

@@ -12,7 +12,7 @@ function ChattingRoom(props) {
     const uid = location.state?.uid;
 
     useEffect(() => {
-        const chatWebSocket = new WebSocket("ws://192.168.3.93:8787/chat")
+        const chatWebSocket = new WebSocket("ws://localhost:8787/chat")
         client.current = Stomp.over(chatWebSocket);
         client.current.connect({}, () => {
             client.current.subscribe(`/chat/room/${uid}`, (payload) => {
@@ -30,7 +30,7 @@ function ChattingRoom(props) {
     }, []);
 
     useEffect(() => {
-        axios.get(`http://192.168.3.93:8787/apis/chatting-list/${uid}`)
+        axios.get(`http://localhost:8787/apis/chatting-list/${uid}`)
             .then(response => {
                 console.log(response.data)
                 setMessages(prevMessages => [...prevMessages, ...response.data])

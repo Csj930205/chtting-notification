@@ -24,7 +24,7 @@ function BoardGroupCreate(props) {
             name : name,
             mandatory : mandatory
         }
-        axios.post(`http://192.168.3.93:8787/apis/board-group`, data, {withCredentials: true})
+        axios.post(`http://localhost:8787/apis/board-group`, data, {withCredentials: true})
             .then(response => {
                 if (response.data === 'success') {
                     alert('생성되었습니다.')

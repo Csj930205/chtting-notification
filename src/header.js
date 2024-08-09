@@ -10,12 +10,17 @@ function Header(props) {
     const navigate = useNavigate();
     const [messages, setMessages] = useState([]);
     const [showDropdown, setShowDropdown] = useState(false);
+    const [showUnreadDropdown, setShowUnreadDropdown] = useState(false);
     const [count, setConut] = useState(0);
     const [notification, setNotification] = useState([]);
+    const [modal ,setModal] = useState(false)
+    const [unreadNotification, setUnreadNotification] = useState([]);
+    const [showAllList, setShowAllList] = useState(false);
+    const [notificationAllList, setNotificationAllList] = useState([])
 
     // useEffect(() => {
     //     if (user) {
-    //         const eventSource = new EventSource(`http://192.168.3.93:8787/apis/notifications/subscribe/${user.username}`, {withCredentials: true});
+    //         const eventSource = new EventSource(`http://localhost:8787/apis/notifications/subscribe/${user.username}`, {withCredentials: true});
     //         try {
     //             eventSource.onopen = () => {
     //                 console.log('EventSources ReadyState', eventSource.readyState);
@@ -42,7 +47,7 @@ function Header(props) {
     useEffect(() => {
         if (user) {
             const memberUid = user.username
-            axios.get(`http://192.168.3.93:8787/apis/unread/notification/${memberUid}`, {withCredentials: true})
+            axios.get(`http://localhost:8787/apis/unread/notification/${memberUid}`, {withCredentials: true})
                 .then((res) => {
                     setConut(res.data.count)
                 })
@@ -81,10 +86,28 @@ function Header(props) {
     const handleCount = () => {
         if(user) {
             const memberUid = user.username
-            axios.delete(`http://192.168.3.93:8787/apis/unread/${memberUid}`, {withCredentials: true})
+            axios.delete(`http://localhost:8787/apis/unread/${memberUid}`, {withCredentials: true})
                 .then((res) => {
                     setConut(0);
+                    setShowUnreadDropdown(true)
+                    setUnreadNotification(res.data.unreadNotification)
                 })
+        } else {
+            setConut(0)
+            setShowUnreadDropdown(false)
+            setUnreadNotification([])
+        }
+    }
+    const handleAllNotification = () => {
+        if (user) {
+            axios.get(`http://localhost:8787/apis/list`, {withCredentials: true})
+                .then((res) => {
+                    setShowAllList(true);
+                    setNotificationAllList(res.data);
+                })
+        } else {
+            setShowAllList(false)
+            setNotificationAllList([])
         }
     }
 
@@ -109,6 +132,22 @@ function Header(props) {
                     )}
                     <br/>
                     <span onClick={handleCount}>읽지않은 메시지: ({count})</span>
+                    {showUnreadDropdown && (
+                        <ul>
+                            {unreadNotification.map((messages, index) => (
+                                <li key={index}>{messages.message}</li>
+                            ))}
+                        </ul>
+                    )}
+                    <br/>
+                    <span onClick={handleAllNotification}>전체 알림보기</span>
+                    {showAllList && (
+                        <ul>
+                            {notificationAllList.map((messages, index) => (
+                                <li key={index}>{messages.message}</li>
+                            ))}
+                        </ul>
+                    )}
                 </div>
             )}
         </div>

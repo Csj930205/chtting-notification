@@ -21,7 +21,7 @@ function SignIn(props) {
             username : username,
             password : password
         }
-        axios.post(`http://192.168.3.93:8787/apis/member/signin`, data, {withCredentials: true})
+        axios.post(`http://localhost:8787/apis/member/signin`, data, {withCredentials: true})
             .then(response => {
                 if (response.data === 'success') {
                     alert('회원가입에 성공하였습니다.')

@@ -44,21 +44,21 @@ function Chatting(props) {
     }
 
     useEffect(() => {
-        axios.get(`http://192.168.3.93:8787/apis/chatting-room`, {withCredentials: true})
+        axios.get(`http://localhost:8787/apis/chatting-room`, {withCredentials: true})
             .then(res => {
                 setChattingRoomList(res.data.chattingRoomList);
             })
             .catch(error => {
                 console.error(error)
             })
-        axios.get(`http://192.168.3.93:8787/apis/member`, {withCredentials: true})
+        axios.get(`http://localhost:8787/apis/member`, {withCredentials: true})
             .then(res => {
                 setMemberList(res.data)
             })
             .catch(error => {
                 console.error(error)
             })
-        const chatWebsocket = new WebSocket("ws://192.168.3.93:8787/chat")
+        const chatWebsocket = new WebSocket("ws://localhost:8787/chat")
             myClient.current = Stomp.over(chatWebsocket)
             myClient.current.connect({}, () => {
                 myClient.current.subscribe(`/chat/room/${user.username}`, (payload) => {
@@ -84,7 +84,7 @@ function Chatting(props) {
             createdBy : createdBy,
             createdDate : createdDate
         }
-        axios.post(`http://192.168.3.93:8787/apis/chatting-room`, data, {withCredentials: true})
+        axios.post(`http://localhost:8787/apis/chatting-room`, data, {withCredentials: true})
             .then(res => {
                 console.log(res.data.result)
             })
@@ -94,7 +94,7 @@ function Chatting(props) {
         navigate('/chatting-room', {state: {uid}})
     }
     const getChattingMessage = (username) => {
-        axios.get(`http://192.168.3.93:8787/apis/chatting-list/${username}`, {withCredentials: true})
+        axios.get(`http://localhost:8787/apis/chatting-list/${username}`, {withCredentials: true})
             .then(res => {
                 setMessages(prevMessages => [...prevMessages, ...res.data])
             })
@@ -110,7 +110,7 @@ function Chatting(props) {
     }
 
     const subscribeWebsocket = (username) => {
-        const chatWebSocket = new WebSocket("ws://192.168.3.93:8787/chat")
+        const chatWebSocket = new WebSocket("ws://localhost:8787/chat")
         userClient.current[username] = Stomp.over(chatWebSocket);
         userClient.current[username].connect({}, () => {
             userClient.current[username].subscribe(`/chat/room/${username}`, (payload) => {

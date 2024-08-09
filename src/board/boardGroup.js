@@ -12,7 +12,7 @@ function BoardGroup(props) {
 
     console.log(user)
     useEffect(() => {
-        axios.get(`http://192.168.3.93:8787/apis/board-group/list`, {withCredentials: true})
+        axios.get(`http://localhost:8787/apis/board-group/list`, {withCredentials: true})
             .then(response => {
                 setBoardGroupList(response.data)
             })
@@ -42,7 +42,7 @@ function BoardGroup(props) {
             boardGroupUid : boardGroupUid,
             boardGroupUsername : user.username
         }
-        axios.post(`http://192.168.3.93:8787/apis/board-group-user`, data, {withCredentials: true})
+        axios.post(`http://localhost:8787/apis/board-group-user`, data, {withCredentials: true})
             .then(response => {
                 if (response.data === 'success') {
                     alert('그룹에 참석되었습니다.')
